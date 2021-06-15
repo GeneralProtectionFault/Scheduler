@@ -1,0 +1,33 @@
+﻿<Window x:Class="Scheduler.Windows.Dash"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Scheduler.Windows"
+        mc:Ignorable="d"
+        Title="Dash" Height="854" Width="1192">
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="Black"/>
+                <GradientStop Color="White" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Calendar x:Name="calendar" HorizontalAlignment="Left" Margin="26,82,0,0" VerticalAlignment="Top" SelectedDatesChanged="calendar_SelectedDatesChanged"/>
+        <DataGrid x:Name="dataAppointments" Margin="242,82,24,441" ItemsSource="{Binding appointments}" CanUserAddRows="False" ColumnWidth="Auto" SelectionChanged="dataAppointments_SelectionChanged"/>
+        <RadioButton x:Name="radDay" Content="Day" IsChecked="True" HorizontalAlignment="Left" Margin="256,406,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Click="radDay_Click"/>
+        <RadioButton x:Name="radWeek" Content="Week" HorizontalAlignment="Left" Margin="356,406,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Click="radWeek_Click"/>
+        <RadioButton x:Name="radMonth" Content="Month" HorizontalAlignment="Left" Margin="465,406,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Click="radMonth_Click"/>
+        <Button x:Name="btnAddAppointment" Content="Add Appointment" HorizontalAlignment="Left" Margin="622,402,0,0" VerticalAlignment="Top" Height="30" Width="166" FontSize="16" Click="btnAddAppointment_Click"/>
+        <Button x:Name="btnDeleteAppointment" Content="Delete Appointment" HorizontalAlignment="Left" Margin="998,402,0,0" VerticalAlignment="Top" Height="30" Width="170" FontSize="16" Click="btnDeleteAppointment_Click"/>
+        <ComboBox x:Name="cmbEvent" HorizontalAlignment="Left" Margin="26,357,0,0" VerticalAlignment="Top" Width="179" Height="40" FontSize="16" SelectionChanged="cmbEvent_SelectionChanged">
+            <DataGrid/>
+        </ComboBox>
+        <DataGrid x:Name="dataCustomers" ItemsSource="{Binding customers}" CanUserAddRows="False" Margin="242,501,24,57"/>
+        <Button x:Name="btnUpdateAppointment" Content="Update Appointment" HorizontalAlignment="Left" Margin="807,402,0,0" VerticalAlignment="Top" Height="30" Width="176" FontSize="16"/>
+        <Button x:Name="btnAddCustomer" Content="Add Customer" HorizontalAlignment="Right" Margin="0,0,404,10" VerticalAlignment="Bottom" Height="30" Width="166" FontSize="16" Click="btnAddCustomer_Click"/>
+        <Button x:Name="btnUpdateCustomer" Content="Update Customer" HorizontalAlignment="Right" Margin="0,0,209,10" VerticalAlignment="Bottom" Height="30" Width="176" FontSize="16" Click="btnUpdateCustomer_Click"/>
+        <Button x:Name="btnDeleteCustomer" Content="Delete Customer" HorizontalAlignment="Right" Margin="0,0,24,10" VerticalAlignment="Bottom" Height="30" Width="170" FontSize="16" Click="btnDeleteCustomer_Click"/>
+
+    </Grid>
+</Window>

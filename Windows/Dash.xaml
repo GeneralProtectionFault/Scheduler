@@ -24,7 +24,7 @@
             <DataGrid/>
         </ComboBox>
         <DataGrid x:Name="dataCustomers" ItemsSource="{Binding customers}" CanUserAddRows="False" Margin="242,501,24,57"/>
-        <Button x:Name="btnUpdateAppointment" Content="Update Appointment" HorizontalAlignment="Left" Margin="807,402,0,0" VerticalAlignment="Top" Height="30" Width="176" FontSize="16"/>
+        <Button x:Name="btnUpdateAppointment" Content="Update Appointment" HorizontalAlignment="Left" Margin="807,402,0,0" VerticalAlignment="Top" Height="30" Width="176" FontSize="16" Click="btnUpdateAppointment_Click_1"/>
         <Button x:Name="btnAddCustomer" Content="Add Customer" HorizontalAlignment="Right" Margin="0,0,404,10" VerticalAlignment="Bottom" Height="30" Width="166" FontSize="16" Click="btnAddCustomer_Click"/>
         <Button x:Name="btnUpdateCustomer" Content="Update Customer" HorizontalAlignment="Right" Margin="0,0,209,10" VerticalAlignment="Bottom" Height="30" Width="176" FontSize="16" Click="btnUpdateCustomer_Click"/>
         <Button x:Name="btnDeleteCustomer" Content="Delete Customer" HorizontalAlignment="Right" Margin="0,0,24,10" VerticalAlignment="Bottom" Height="30" Width="170" FontSize="16" Click="btnDeleteCustomer_Click"/>

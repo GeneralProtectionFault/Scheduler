@@ -23,11 +23,32 @@ namespace Scheduler.Windows
         public static event EventHandler AppointmentAdded;
 
 
+
+        // LAMBDA =D
+        // Very simply function, not worth writing out a full method
+        Func<int, int> convert24HourTime = x => x + 12;
+
         private void btnAddAppointment_Click(object sender, RoutedEventArgs e)
         {
             // ******** ADD BUSINESS HOURS CHECK ******************
 
 
+
+
+            bool startIsPM = cmbAddAppointmentStartAMPM.Text == "PM" ? true : false;
+            bool endIsPM = cmbAddAppointmentEndAMPM.Text == "PM" ? true : false;
+
+            int enteredStartHour = Convert.ToInt32(cmbAddAppointmentStartHour.Text);
+            int enteredEndHour = Convert.ToInt32(cmbAddAppointmentEndHour.Text);
+
+            string startHour = startIsPM ? convert24HourTime(enteredStartHour).ToString("00") : enteredStartHour.ToString("00");
+            string endHour = endIsPM ? convert24HourTime(enteredEndHour).ToString("00") : enteredEndHour.ToString("00");
+
+
+            string startDateString = $"{dateStart.SelectedDate.Value.ToString("yyyy-MM-dd")} {startHour}:{cmbAddAppointmentStartMinute.Text}";
+            string endDateString = $"{dateEnd.SelectedDate.Value.ToString("yyyy-MM-dd")} {endHour}:{cmbAddAppointmentEndMinute.Text}";
+            DateTime startDate24hr = DateTime.Parse(startDateString);
+            DateTime endDate24hr = DateTime.Parse(endDateString);
 
 
 
@@ -58,7 +79,7 @@ namespace Scheduler.Windows
                 using (OdbcCommand addAppointment = conn.CreateCommand())
                 {
                     addAppointment.CommandText = $"INSERT INTO appointment (customerId, userId, title, description, location, contact, type, url, start, end, createDate, createdBy, lastUpdate, lastUpdateBy)" +
-                                                $"VALUES({MainWindow.customerId}, {MainWindow.userId}, '{txtTitle.Text}', '{txtDescription.Text}', '{txtLocation.Text}', '{txtContact.Text}', '{txtType.Text}', '{txtURL.Text}', '{dateStart.SelectedDate.Value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{dateEnd.SelectedDate.Value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}'," +
+                                                $"VALUES({MainWindow.customerId}, {MainWindow.userId}, '{txtTitle.Text}', '{txtDescription.Text}', '{txtLocation.Text}', '{txtContact.Text}', '{txtType.Text}', '{txtURL.Text}', '{startDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{endDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}'," +
                                                 $"'{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}', '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}');";
 
                     addAppointment.ExecuteNonQuery();

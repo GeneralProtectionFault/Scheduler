@@ -18,20 +18,26 @@
         <Label x:Name="lblTitle" Content="Title" HorizontalAlignment="Left" Margin="45,107,0,0" VerticalAlignment="Top" Height="34" Width="175" FontSize="18" FontWeight="Bold"/>
         <Label x:Name="lblDescription" Content="Description" HorizontalAlignment="Left" Margin="45,146,0,0" VerticalAlignment="Top" Height="34" Width="175" FontSize="18" FontWeight="Bold"/>
         <Label x:Name="lblLocation" Content="Location" HorizontalAlignment="Left" Margin="45,185,0,0" VerticalAlignment="Top" Height="34" Width="175" FontSize="18" FontWeight="Bold"/>
-        <Label x:Name="lblContact" Content="Contact" HorizontalAlignment="Left" Margin="45,276,0,0" VerticalAlignment="Top" Height="34" Width="175" FontSize="18" FontWeight="Bold"/>
-        <Label x:Name="lblType" Content="Type" HorizontalAlignment="Left" Margin="45,0,0,0" VerticalAlignment="Center" Height="34" Width="175" FontSize="18" FontWeight="Bold"/>
+        <Label x:Name="lblContact" Content="Contact" HorizontalAlignment="Left" Margin="45,270,0,0" VerticalAlignment="Top" Height="34" Width="175" FontSize="18" FontWeight="Bold"/>
+        <Label x:Name="lblType" Content="Type" HorizontalAlignment="Left" Margin="45,319,0,0" VerticalAlignment="Top" Height="34" Width="175" FontSize="18" FontWeight="Bold"/>
         <Label x:Name="lblURL" Content="URL" HorizontalAlignment="Left" Margin="45,350,0,0" VerticalAlignment="Top" Height="34" Width="175" FontSize="18" FontWeight="Bold"/>
         <Label x:Name="lblStart" Content="Start" HorizontalAlignment="Left" Margin="45,389,0,0" VerticalAlignment="Top" Height="34" Width="175" FontSize="18" FontWeight="Bold"/>
         <Label x:Name="lblEnd" Content="End" HorizontalAlignment="Left" Margin="45,428,0,0" VerticalAlignment="Top" Height="34" Width="175" FontSize="18" FontWeight="Bold"/>
         <TextBox x:Name="txtTitle" HorizontalAlignment="Left" Margin="225,111,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="259" Height="26" RenderTransformOrigin="0.49,1.732" FontSize="16"/>
         <TextBox x:Name="txtDescription" HorizontalAlignment="Left" Margin="225,150,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="259" Height="26" RenderTransformOrigin="0.49,1.732" FontSize="16"/>
         <TextBox x:Name="txtLocation" HorizontalAlignment="Left" Margin="225,189,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="259" Height="26" RenderTransformOrigin="0.49,1.732" FontSize="16"/>
-        <TextBox x:Name="txtContact" HorizontalAlignment="Left" Margin="225,280,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="259" Height="26" RenderTransformOrigin="0.49,1.732" FontSize="16"/>
-        <TextBox x:Name="txtType" HorizontalAlignment="Left" Margin="225,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="259" Height="26" RenderTransformOrigin="0.49,1.732" FontSize="16"/>
+        <TextBox x:Name="txtContact" HorizontalAlignment="Left" Margin="225,274,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="259" Height="26" RenderTransformOrigin="0.49,1.732" FontSize="16"/>
+        <TextBox x:Name="txtType" HorizontalAlignment="Left" Margin="225,323,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="259" Height="26" RenderTransformOrigin="0.49,1.732" FontSize="16"/>
         <TextBox x:Name="txtURL" HorizontalAlignment="Left" Margin="225,354,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="259" Height="26" RenderTransformOrigin="0.49,1.732" FontSize="16"/>
         <DatePicker x:Name="dateStart" HorizontalAlignment="Left" Margin="224,391,0,0" VerticalAlignment="Top" Width="129" FontSize="16"/>
         <DatePicker x:Name="dateEnd" HorizontalAlignment="Left" Margin="224,430,0,0" VerticalAlignment="Top" Width="128" FontSize="16"/>
         <Label x:Name="lblAppointmentTitle" Content="Add Appointment" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" FontSize="36" Foreground="White"/>
+        <ComboBox x:Name="cmbAddAppointmentStartHour" HorizontalAlignment="Left" Margin="387,395,0,0" VerticalAlignment="Top" Width="44"/>
+        <ComboBox x:Name="cmbAddAppointmentStartMinute" HorizontalAlignment="Left" Margin="467,395,0,0" VerticalAlignment="Top" Width="44"/>
+        <ComboBox x:Name="cmbAddAppointmentStartAMPM" HorizontalAlignment="Left" Margin="569,395,0,0" VerticalAlignment="Top" Width="44"/>
+        <ComboBox x:Name="cmbAddAppointmentEndHour" HorizontalAlignment="Left" Margin="387,434,0,0" VerticalAlignment="Top" Width="44"/>
+        <ComboBox x:Name="cmbAddAppointmentEndMinute" HorizontalAlignment="Left" Margin="467,434,0,0" VerticalAlignment="Top" Width="44"/>
+        <ComboBox x:Name="cmbAddAppointmentEndAMPM" HorizontalAlignment="Left" Margin="569,434,0,0" VerticalAlignment="Top" Width="44"/>
 
     </Grid>
 </Window>

@@ -43,9 +43,7 @@ namespace Scheduler.Windows
             InitializeComponent();
 
             
-            OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString);
-
-            using (conn)
+            using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
             {
                 // Populate country box w/ available countries.
                 using (OdbcCommand populateCountries = conn.CreateCommand())

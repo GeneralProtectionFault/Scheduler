@@ -24,12 +24,15 @@ namespace Scheduler.Windows
             // For updating the collection whenever an appointment is added
             AddAppointment.AppointmentAdded += UpdateAppointmentsFromEvent;
             AddCustomer.CustomerAdded += UpdateCustomersFromEvent;
+            UpdateAppointment.AppointmentUpdated += UpdateAppointmentsFromEvent;
+            UpdateCustomer.CustomerUpdated += UpdateCustomersFromEvent;
 
             if (calendar.SelectedDate == null)
                 calendar.SelectedDate = DateTime.Now.Date;
 
+            var query = $"select * from appointment WHERE DATE(start) = DATE('{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}');";
             // Start/default to all appointments
-            CreateDataCollection(@"select * from appointment;");
+            CreateDataCollection(query);
             CreateCustomerCollection();
         }
 
@@ -47,7 +50,9 @@ namespace Scheduler.Windows
                 {
                     conn.Open();
 
-                    populateCustomers.CommandText = @"select * from customer;";
+                    populateCustomers.CommandText = @"select c.customerId, c.addressId, c.active, c.customerName, a.address, a.address2, a.postalCode, a.phone, c.createDate, c.createdBy, c.lastUpdate, c.lastUpdateBy
+                                                        from customer c
+                                                        JOIN address a on c.addressId = a.addressId;";
 
                     OdbcDataReader reader = populateCustomers.ExecuteReader();
 
@@ -55,18 +60,34 @@ namespace Scheduler.Windows
                     {
                         while(reader.Read())
                         {
+                            //var customerId = reader.GetInt32(0);
+                            //var addressId = reader.GetInt32(1);
+                            //var active = reader.GetInt32(2);
+                            //var customerName = reader.GetString(3);
+                            //var address = reader.GetString(4);
+                            //var address2 = reader.GetString(5);
+                            //var postalCode = reader.GetString(6);
+                            //var createDate = reader.GetDateTime(7).ToLocalTime();
+                            //var createdBy = reader.GetString(8);
+                            //var lastUpdate = reader.GetDateTime(9).ToLocalTime();
+                            //var lastUpdateBy = reader.GetString(10);
+
                             dashModel.customers.Add(
                                 new Customer()
                                 {
                                     customerId = reader.GetInt32(0),
-                                    customerName = reader.GetString(1),
-                                    addressId = reader.GetInt32(2),
-                                    active = reader.GetInt32(3),
-                                    createDate = reader.GetDateTime(4).ToLocalTime(),
-                                    createdBy = reader.GetString(5),
-                                    lastUpdate = reader.GetDateTime(6).ToLocalTime(),
-                                    lastUpdateBy = reader.GetString(7)
-                                });
+                                    addressId = reader.GetInt32(1),
+                                    active = reader.GetInt32(2),
+                                    customerName = reader.GetString(3),
+                                    address = reader.GetString(4),
+                                    address2 = reader.GetString(5),
+                                    postalCode = reader.GetString(6),
+                                    phone = reader.GetString(7),
+                                    createDate = reader.GetDateTime(8).ToLocalTime(),
+                                    createdBy = reader.GetString(9),
+                                    lastUpdate = reader.GetDateTime(10).ToLocalTime(),
+                                    lastUpdateBy = reader.GetString(11)
+                                }); ;
                         }
                     }
                 }
@@ -143,7 +164,7 @@ namespace Scheduler.Windows
             // Debug.WriteLine(calendarDate);
 
             if (calendarDate != null)
-                CreateDataCollection($"select * from appointment WHERE DATE(start) = '{calendarDate}'");
+                CreateDataCollection($"select * from appointment WHERE DATE(start) = DATE('{calendarDate}')");
         }
 
 
@@ -394,7 +415,25 @@ namespace Scheduler.Windows
 
         private void btnUpdateCustomer_Click(object sender, RoutedEventArgs e)
         {
+            if (dataCustomers.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a customer to update.");
+                return;
+            }
 
+            // Store these Ids in static variables for updating
+
+            DataGridRow row = (DataGridRow)dataCustomers.ItemContainerGenerator.ContainerFromItem(dataCustomers.SelectedItem);
+            var customerIdCell = dataCustomers.Columns[0].GetCellContent(row) as TextBlock;
+            MainWindow.customerId = Convert.ToInt32(customerIdCell.Text);
+
+            var customerAddressCell = dataCustomers.Columns[2].GetCellContent(row) as TextBlock;
+            MainWindow.addressId = Convert.ToInt32(customerAddressCell.Text);
+            
+
+            // Open Update Customer Window...
+            var updateWindow = new UpdateCustomer();
+            updateWindow.Show();
         }
 
 
@@ -416,9 +455,8 @@ namespace Scheduler.Windows
             if (result == MessageBoxResult.Cancel)
                 return;
 
-            OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString);
 
-            using (conn)
+            using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
             using (OdbcCommand deleteCustomer = conn.CreateCommand())
             {
                 conn.Open();
@@ -429,8 +467,24 @@ namespace Scheduler.Windows
         }
 
 
+
         #endregion
 
-        
+        private void btnUpdateAppointment_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (dataAppointments.SelectedItem == null)
+            {
+                MessageBox.Show("Please select an appointment to update.");
+                return;
+            }
+
+            DataGridRow row = (DataGridRow)dataAppointments.ItemContainerGenerator.ContainerFromItem(dataAppointments.SelectedItem);
+            var appointmentCellContent = dataAppointments.Columns[0].GetCellContent(row) as TextBlock;
+
+            MainWindow.appointmentId = Convert.ToInt32(appointmentCellContent.Text);
+
+            var updateWindow = new UpdateAppointment();
+            updateWindow.Show();
+        }
     }
 }

@@ -7,7 +7,7 @@ using System.Windows;
 using System.Data;
 using System.Data.Odbc;
 using System.Globalization;
-
+using System.IO;
 
 namespace Scheduler
 {
@@ -53,6 +53,33 @@ namespace Scheduler
                 TagalogWindow();
             }
         }
+
+
+        
+        /// <summary>
+        /// Logging is only relevant to this class/only called upon logging in, so including anonymous function here (lambda)
+        /// instead of bothering w/ breaking out logging functionality to its own class/method
+        /// </summary>
+        Action<string> logger = line =>
+        {
+            // Log file - in program folder\Log\ - filename is date, etc...
+            string logDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"\Log\";
+            string logFile = DateTime.Now.ToString("yyyyMMdd", CultureInfo.InvariantCulture) + "_LOG.txt";
+            string logPath = logDirectory + logFile;
+
+            if (!Directory.Exists(logDirectory))
+                Directory.CreateDirectory(logDirectory);
+
+            // Create the log file if it doesn't exist
+            if (!File.Exists(logPath))
+                File.Create(logPath).Close();
+
+            using (var tw = new StreamWriter(logPath, true))
+            {
+                tw.WriteLine(Environment.UserName.ToUpper() + "\t" +
+                    DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss tt", CultureInfo.InvariantCulture) + "\t" + line);
+            }
+        };
 
 
         void ConnectionTest()
@@ -160,7 +187,7 @@ namespace Scheduler
                 userName = login;
             }
 
-            Logger.Log($"User {login} loggin in.");
+            logger($"User {login} loggin in.");
 
 
             // Otherwise, cue the main application window and axe the login window

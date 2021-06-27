@@ -38,7 +38,7 @@ namespace Scheduler.Windows
             if (calendar.SelectedDate == null)
                 calendar.SelectedDate = DateTime.Now.Date;
 
-            // Default to the current day on startup
+            // Default to the current week on startup
             var query = $"select * from appointment WHERE WEEK(start) = WEEK('{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}');";
             // Start/default to all appointments
             CreateDataCollection(query);

@@ -72,6 +72,7 @@ namespace Scheduler.Windows
         // LAMBDA =D
         // Very simply function, not worth writing out a full method
         Func<int, int> convert24HourTime = x => x + 12;
+        
 
 
         private void btnUpdateConfirm_Click(object sender, RoutedEventArgs e)

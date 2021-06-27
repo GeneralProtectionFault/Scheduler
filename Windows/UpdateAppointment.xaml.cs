@@ -96,7 +96,15 @@ namespace Scheduler.Windows
             DateTime startDate24hr = DateTime.Parse(startDateString);
             DateTime endDate24hr = DateTime.Parse(endDateString);
 
-
+            // Business hours check
+            TimeSpan earlyLimit = new TimeSpan(8, 0, 0);
+            TimeSpan lateLimit = new TimeSpan(17, 0, 0);
+            if (startDate24hr.TimeOfDay < earlyLimit || startDate24hr.TimeOfDay > lateLimit ||
+                endDate24hr.TimeOfDay < earlyLimit || endDate24hr.TimeOfDay > lateLimit)
+            {
+                MessageBox.Show("Please schedule appointment within local business hours: 8 AM - 5 PM.");
+                return;
+            }
 
             using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
             {

@@ -13,7 +13,7 @@
         </LinearGradientBrush>
     </Window.Background>
     <Grid>
-        <Label x:Name="lblLogin" Content="Login" HorizontalAlignment="Left" Margin="207,88,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblLogin" Content="Login" HorizontalAlignment="Left" Margin="187,88,0,0" VerticalAlignment="Top" Width="59"/>
         <Label x:Name="lblPassword" Content="Password" HorizontalAlignment="Left" Margin="187,128,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="txtLogin" HorizontalAlignment="Left" Margin="271,92,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="203" Height="22"/>
         <PasswordBox x:Name="txtPassword" HorizontalAlignment="Left" Margin="271,130,0,0" VerticalAlignment="Top" Width="203" Height="22"/>

@@ -28,6 +28,17 @@
         <Button x:Name="btnAddCustomer" Content="Add Customer" HorizontalAlignment="Right" Margin="0,0,404,10" VerticalAlignment="Bottom" Height="30" Width="166" FontSize="16" Click="btnAddCustomer_Click"/>
         <Button x:Name="btnUpdateCustomer" Content="Update Customer" HorizontalAlignment="Right" Margin="0,0,209,10" VerticalAlignment="Bottom" Height="30" Width="176" FontSize="16" Click="btnUpdateCustomer_Click"/>
         <Button x:Name="btnDeleteCustomer" Content="Delete Customer" HorizontalAlignment="Right" Margin="0,0,24,10" VerticalAlignment="Bottom" Height="30" Width="170" FontSize="16" Click="btnDeleteCustomer_Click"/>
+        <Button x:Name="btnReports" Content="Show Report" HorizontalAlignment="Left" Margin="26,501,0,0" VerticalAlignment="Top" Height="28" Width="179" FontSize="14" FontWeight="Bold" Click="btnReports_Click">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="White"/>
+                    <GradientStop Color="#FF0A9E39" Offset="1"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
+        <ComboBox x:Name="cmbReports" HorizontalAlignment="Left" Margin="26,534,0,0" VerticalAlignment="Top" Width="179" Height="30" FontSize="14">
+            <DataGrid/>
+        </ComboBox>
 
     </Grid>
 </Window>

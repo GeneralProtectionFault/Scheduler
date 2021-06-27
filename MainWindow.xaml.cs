@@ -44,7 +44,11 @@ namespace Scheduler
             //ConnectionTest();
 
             var location = GetUserLocation();
-            if (location == "PHL")
+
+            // TESTING
+            MessageBox.Show(location);
+
+            if (location == "fil")
             {
                 TagalogWindow();
             }
@@ -82,6 +86,8 @@ namespace Scheduler
 
             lblLogin.Content = "Mag-log in";
             lblPassword.Content = "Hudyat";
+            btnSubmit.Content = "Lpasa";
+            this.Title = "Window sa Pag-login";
         }
 
 
@@ -108,7 +114,11 @@ namespace Scheduler
 
                     if (!reader.HasRows)
                     {
-                        MessageBox.Show($"User: {login} does not exist");
+                        if (isTagalog)
+                            MessageBox.Show($"Walang user {login}");
+                        else
+                            MessageBox.Show($"User: {login} does not exist");
+
                         return;
                     }
                 }

@@ -16,6 +16,24 @@ namespace Scheduler.Windows
         public AddAppointment()
         {
             InitializeComponent();
+
+            // Populate time selection dropdowns
+            for (int i = 1; i <= 12; i++)
+            {
+                cmbAddAppointmentStartHour.Items.Add(i.ToString("00"));
+                cmbAddAppointmentEndHour.Items.Add(i.ToString("00"));
+            }
+
+            for (int i = 0; i <= 59; i++)
+            {
+                cmbAddAppointmentStartMinute.Items.Add(i.ToString("00"));
+                cmbAddAppointmentEndMinute.Items.Add(i.ToString("00"));
+            }
+
+            cmbAddAppointmentStartAMPM.Items.Add("AM");
+            cmbAddAppointmentStartAMPM.Items.Add("PM");
+            cmbAddAppointmentEndAMPM.Items.Add("AM");
+            cmbAddAppointmentEndAMPM.Items.Add("PM");
         }
 
 
@@ -30,10 +48,12 @@ namespace Scheduler.Windows
 
         private void btnAddAppointment_Click(object sender, RoutedEventArgs e)
         {
-            // ******** ADD BUSINESS HOURS CHECK ******************
-
-
-
+            if (dateStart.SelectedDate == null || cmbAddAppointmentStartHour.SelectedItem == null || cmbAddAppointmentStartMinute.SelectedItem == null ||cmbAddAppointmentStartAMPM.SelectedItem == null ||
+                cmbAddAppointmentEndHour.SelectedItem == null || cmbAddAppointmentEndMinute.SelectedItem == null || cmbAddAppointmentEndAMPM.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a full date and time for both start and end of appointment.");
+                return;
+            }
 
             bool startIsPM = cmbAddAppointmentStartAMPM.Text == "PM" ? true : false;
             bool endIsPM = cmbAddAppointmentEndAMPM.Text == "PM" ? true : false;
@@ -43,14 +63,21 @@ namespace Scheduler.Windows
 
             string startHour = startIsPM ? convert24HourTime(enteredStartHour).ToString("00") : enteredStartHour.ToString("00");
             string endHour = endIsPM ? convert24HourTime(enteredEndHour).ToString("00") : enteredEndHour.ToString("00");
-
-
+            
             string startDateString = $"{dateStart.SelectedDate.Value.ToString("yyyy-MM-dd")} {startHour}:{cmbAddAppointmentStartMinute.Text}";
             string endDateString = $"{dateEnd.SelectedDate.Value.ToString("yyyy-MM-dd")} {endHour}:{cmbAddAppointmentEndMinute.Text}";
             DateTime startDate24hr = DateTime.Parse(startDateString);
             DateTime endDate24hr = DateTime.Parse(endDateString);
 
-
+            // Business hours check
+            TimeSpan earlyLimit = new TimeSpan(8, 0, 0);
+            TimeSpan lateLimit = new TimeSpan(17, 0, 0);
+            if (startDate24hr.TimeOfDay < earlyLimit || startDate24hr.TimeOfDay > lateLimit ||
+                endDate24hr.TimeOfDay < earlyLimit || endDate24hr.TimeOfDay > lateLimit)
+            {
+                MessageBox.Show("Please schedule appointment within local business hours: 8 AM - 5 PM.");
+                return;
+            }
 
             OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString);
 

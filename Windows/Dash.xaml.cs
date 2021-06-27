@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Data.Odbc;
 using System.Diagnostics;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Scheduler.Windows
 {
@@ -21,6 +23,12 @@ namespace Scheduler.Windows
             InitializeComponent();
             DataContext = dashModel;
 
+            // Timer for 15-minute alerts
+            DispatcherTimer dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += dispatcherTimer_Tick;
+            dispatcherTimer.Interval = new TimeSpan(0, 1, 0);
+            dispatcherTimer.Start();
+
             // For updating the collection whenever an appointment is added
             AddAppointment.AppointmentAdded += UpdateAppointmentsFromEvent;
             AddCustomer.CustomerAdded += UpdateCustomersFromEvent;
@@ -30,11 +38,54 @@ namespace Scheduler.Windows
             if (calendar.SelectedDate == null)
                 calendar.SelectedDate = DateTime.Now.Date;
 
+            // Default to the current day on startup
             var query = $"select * from appointment WHERE DATE(start) = DATE('{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}');";
             // Start/default to all appointments
             CreateDataCollection(query);
             CreateCustomerCollection();
+
+            cmbReports.Items.Add("Appointment Types");
+            cmbReports.Items.Add("Consultant Schedules");
+            cmbReports.Items.Add("Past/Expired Appointments");
         }
+
+
+        /// <summary>
+        /// Check for a meeting that might come up in the next 15 minutes!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            Debug.WriteLine("Timer tick!!!");
+
+            using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
+            using (OdbcCommand reminderCheck = conn.CreateCommand())
+            {
+                conn.Open();
+
+                var queryString = $"select * from appointment WHERE userId = {MainWindow.userId} AND TIMESTAMPDIFF(MINUTE,'{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}',start) between 0 and 15;";
+                Debug.WriteLine(queryString);
+                reminderCheck.CommandText = queryString;
+
+                using (OdbcDataReader reader = reminderCheck.ExecuteReader())
+                {
+                    if (!reader.HasRows)
+                        return;
+
+                    StringBuilder messageText = new StringBuilder();
+                    messageText.Append("You have the following appointments soon:\n\n");
+
+                    while(reader.Read())
+                    {
+                        messageText.Append($"{reader.GetString(3)}, {reader.GetString(4)}, {reader.GetString(5)}, {reader.GetString(6)}, {reader.GetString(7)}, {reader.GetString(8)}, {reader.GetDateTime(9).ToLocalTime().ToString()} - {reader.GetDateTime(10).ToLocalTime().ToString()}\n");
+                    }
+
+                    MessageBox.Show(messageText.ToString());
+                }
+            }
+        }
+
 
 
 
@@ -60,18 +111,6 @@ namespace Scheduler.Windows
                     {
                         while(reader.Read())
                         {
-                            //var customerId = reader.GetInt32(0);
-                            //var addressId = reader.GetInt32(1);
-                            //var active = reader.GetInt32(2);
-                            //var customerName = reader.GetString(3);
-                            //var address = reader.GetString(4);
-                            //var address2 = reader.GetString(5);
-                            //var postalCode = reader.GetString(6);
-                            //var createDate = reader.GetDateTime(7).ToLocalTime();
-                            //var createdBy = reader.GetString(8);
-                            //var lastUpdate = reader.GetDateTime(9).ToLocalTime();
-                            //var lastUpdateBy = reader.GetString(10);
-
                             dashModel.customers.Add(
                                 new Customer()
                                 {
@@ -485,6 +524,129 @@ namespace Scheduler.Windows
 
             var updateWindow = new UpdateAppointment();
             updateWindow.Show();
+        }
+
+
+        /// <summary>
+        /// Show the report corresponding to the selected item in the nearby dropdown
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnReports_Click(object sender, RoutedEventArgs e)
+        {
+            if (cmbReports.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a report from the dropdown.");
+                return;
+            }
+
+            using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
+            {
+                conn.Open();
+
+                if (cmbReports.SelectedItem.ToString() == "Appointment Types")
+                {
+                    var selectedMonth = calendar.SelectedDate.Value.Month;
+
+                    using (OdbcCommand appointmentTypesMonth = conn.CreateCommand())
+                    {
+                        appointmentTypesMonth.CommandText = $"select distinct type from appointment WHERE MONTH(start) = {selectedMonth};";
+
+                        StringBuilder appointmentTypes = new StringBuilder();
+
+                        using (OdbcDataReader reader = appointmentTypesMonth.ExecuteReader())
+                        {
+                            if (!reader.HasRows)
+                            {
+                                MessageBox.Show("There are no appointments in the selected month");
+                                return;
+                            }
+
+                            appointmentTypes.Append("There are the following appointment types for the selected month:\n\n");
+
+                            while (reader.Read())
+                            {
+                                appointmentTypes.Append($"{reader.GetString(0)}\n");
+                            }
+
+                            MessageBox.Show(appointmentTypes.ToString());
+                        }
+                    }
+                }
+                else if (cmbReports.SelectedItem.ToString() == "Consultant Schedules")
+                {
+                    using (OdbcCommand consultantSchedules = conn.CreateCommand())
+                    {
+                        consultantSchedules.CommandText = $"select userName, a.* from appointment a " +
+                            $"JOIN user u on a.userId = u.userId " +
+                            $"WHERE start >= '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}' " +
+                            $"ORDER BY u.userName;";
+                    
+                        using (OdbcDataReader reader = consultantSchedules.ExecuteReader())
+                        {
+                            if (!reader.HasRows)
+                            {
+                                MessageBox.Show("No unexpired appointments");
+                                return;
+                            }
+
+                            StringBuilder consultantAppointments = new StringBuilder();
+                            consultantAppointments.Append("Following is a list of future appointments for all users:\n--------------------------------------------------------\n\n");
+
+
+                            var counter = 0;
+                            var currentUser = "";
+
+                            while(reader.Read())
+                            {
+                                // First row
+                                if (counter == 0)
+                                {
+                                    currentUser = reader.GetString(0);
+                                    consultantAppointments.Append($"{reader.GetString(0)}:\n\n");
+                                }
+                                // If we've reached a new user, display the name and separate to show their appointments
+                                else if (currentUser != reader.GetString(0))
+                                {
+                                    currentUser = reader.GetString(0);
+                                    consultantAppointments.Append($"{reader.GetString(0)}:\n\n");
+                                }
+
+                                consultantAppointments.Append($"{reader.GetString(4)}, {reader.GetString(5)}: {reader.GetDateTime(10).ToLocalTime().ToString()}\n");
+                                counter++;
+                            }
+
+                            MessageBox.Show(consultantAppointments.ToString());
+                        }
+                    }
+                }
+                else if (cmbReports.SelectedItem.ToString() == "Past/Expired Appointments")
+                {
+                    using (OdbcCommand expiredAppointments = conn.CreateCommand())
+                    {
+                        expiredAppointments.CommandText = $"select * from appointment WHERE end < '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}';";
+
+                        using (OdbcDataReader reader = expiredAppointments.ExecuteReader())
+                        {
+                            if (!reader.HasRows)
+                            {
+                                MessageBox.Show("There are no expired appointments.");
+                                return;
+                            }
+
+                            StringBuilder expired = new StringBuilder();
+                            expired.Append("The following appointments have expired and you may wish to delete:\n\n");
+
+                            while (reader.Read())
+                            {
+                                expired.Append($"{reader.GetString(3)}, {reader.GetString(4)}: {reader.GetDateTime(9).ToLocalTime()} - {reader.GetDateTime(10).ToLocalTime()}\n\n");
+                            }
+
+                            MessageBox.Show(expired.ToString());
+                        }
+                    }
+                }
+            }
         }
     }
 }

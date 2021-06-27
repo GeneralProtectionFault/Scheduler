@@ -81,14 +81,14 @@ namespace Scheduler.Windows
             // Ensure dates and such are filled!
             MainWindow.customerId = currentCustomers[cmbUpdateAppointmentCustomer.Text];
 
-            bool startIsPM = cmbUpdateAppointmentStartAMPM.Text == "PM" ? true : false;
-            bool endIsPM = cmbUpdateAppointmentEndAMPM.Text == "PM" ? true : false;
+            bool convertStartTo24Hour = cmbUpdateAppointmentStartAMPM.Text == "PM" && cmbUpdateAppointmentStartHour.Text != "12" ? true : false;
+            bool convertEndTo24Hour = cmbUpdateAppointmentEndAMPM.Text == "PM" && cmbUpdateAppointmentEndHour.Text != "12" ? true : false;
 
             int enteredStartHour = Convert.ToInt32(cmbUpdateAppointmentStartHour.Text);
             int enteredEndHour = Convert.ToInt32(cmbUpdateAppointmentEndHour.Text);
 
-            string startHour =  startIsPM ? convert24HourTime(enteredStartHour).ToString("00") : enteredStartHour.ToString("00");
-            string endHour = endIsPM ? convert24HourTime(enteredEndHour).ToString("00") : enteredEndHour.ToString("00");
+            string startHour =  convertStartTo24Hour ? convert24HourTime(enteredStartHour).ToString("00") : enteredStartHour.ToString("00");
+            string endHour = convertEndTo24Hour ? convert24HourTime(enteredEndHour).ToString("00") : enteredEndHour.ToString("00");
 
 
             string startDateString = $"{dateUpdateAppointmentStart.SelectedDate.Value.ToString("yyyy-MM-dd")} {startHour}:{cmbUpdateAppointmentStartMinute.Text}";

@@ -55,14 +55,14 @@ namespace Scheduler.Windows
                 return;
             }
 
-            bool startIsPM = cmbAddAppointmentStartAMPM.Text == "PM" ? true : false;
-            bool endIsPM = cmbAddAppointmentEndAMPM.Text == "PM" ? true : false;
+            bool convertStartTo24Hour = cmbAddAppointmentStartAMPM.Text == "PM" && cmbAddAppointmentStartHour.Text != "12" ? true : false;
+            bool convertEndTo24Hour = cmbAddAppointmentEndAMPM.Text == "PM" && cmbAddAppointmentEndHour.Text != "12" ? true : false;
 
             int enteredStartHour = Convert.ToInt32(cmbAddAppointmentStartHour.Text);
             int enteredEndHour = Convert.ToInt32(cmbAddAppointmentEndHour.Text);
 
-            string startHour = startIsPM ? convert24HourTime(enteredStartHour).ToString("00") : enteredStartHour.ToString("00");
-            string endHour = endIsPM ? convert24HourTime(enteredEndHour).ToString("00") : enteredEndHour.ToString("00");
+            string startHour = convertStartTo24Hour ? convert24HourTime(enteredStartHour).ToString("00") : enteredStartHour.ToString("00");
+            string endHour = convertEndTo24Hour ? convert24HourTime(enteredEndHour).ToString("00") : enteredEndHour.ToString("00");
             
             string startDateString = $"{dateStart.SelectedDate.Value.ToString("yyyy-MM-dd")} {startHour}:{cmbAddAppointmentStartMinute.Text}";
             string endDateString = $"{dateEnd.SelectedDate.Value.ToString("yyyy-MM-dd")} {endHour}:{cmbAddAppointmentEndMinute.Text}";

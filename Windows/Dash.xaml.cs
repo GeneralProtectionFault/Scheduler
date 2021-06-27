@@ -39,7 +39,7 @@ namespace Scheduler.Windows
                 calendar.SelectedDate = DateTime.Now.Date;
 
             // Default to the current day on startup
-            var query = $"select * from appointment WHERE DATE(start) = DATE('{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}');";
+            var query = $"select * from appointment WHERE WEEK(start) = WEEK('{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}');";
             // Start/default to all appointments
             CreateDataCollection(query);
             CreateCustomerCollection();
@@ -192,21 +192,6 @@ namespace Scheduler.Windows
 
 
 
-        /// <summary>
-        /// Modify the collection so only appointments of a given day are selected
-        /// </summary>
-        public void SelectDay()
-        {
-            // First, get the day selected from the calendar
-            var calendarDate = calendar.SelectedDate.Value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss");
-           
-            // Debug.WriteLine(calendarDate);
-
-            if (calendarDate != null)
-                CreateDataCollection($"select * from appointment WHERE DATE(start) = DATE('{calendarDate}')");
-        }
-
-
         private void SelectWeek()
         {
             // First, get the day selected from the calendar
@@ -231,13 +216,6 @@ namespace Scheduler.Windows
         }
 
 
-
-
-        private void radDay_Click(object sender, RoutedEventArgs e)
-        {
-            SelectDay();
-        }
-
         private void radWeek_Click(object sender, RoutedEventArgs e)
         {
             SelectWeek();
@@ -251,9 +229,7 @@ namespace Scheduler.Windows
 
         internal void UpdateDates()
         {
-            if (radDay.IsChecked == true)
-                SelectDay();
-            else if (radWeek.IsChecked == true)
+            if (radWeek.IsChecked == true)
                 SelectWeek();
             else if (radMonth.IsChecked == true)
                 SelectMonth();
@@ -395,9 +371,10 @@ namespace Scheduler.Windows
 
             DataGridRow row = (DataGridRow)dataAppointments.ItemContainerGenerator.ContainerFromItem(dataAppointments.SelectedItem);
             var appointmentCellContent = dataAppointments.Columns[0].GetCellContent(row) as TextBlock;
-            var appointmentId = Convert.ToInt32(appointmentCellContent.Text);
 
-
+            MainWindow.appointmentId = Convert.ToInt32(appointmentCellContent.Text);
+            var updateWindow = new UpdateAppointment();
+            updateWindow.Show();
         }
 
 

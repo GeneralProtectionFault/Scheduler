@@ -46,7 +46,7 @@ namespace Scheduler
             var location = GetUserLocation();
 
             // TESTING
-            MessageBox.Show(location);
+            // MessageBox.Show(location);
 
             if (location == "fil")
             {

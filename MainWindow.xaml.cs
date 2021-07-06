@@ -25,6 +25,7 @@ namespace Scheduler
                                             "UID=U066t8;" +
                                             "PASSWORD=53688691784;" +
                                             "OPTION=3";
+        
         // Track the user that logged in
         internal static int userId;
         internal static string userName;
@@ -124,75 +125,86 @@ namespace Scheduler
             var login = txtLogin.Text;
             var password = txtPassword.Password;
 
-            OdbcConnection conn = new OdbcConnection(MySQLConnectionString);
 
-            using (conn)
+            try
             {
-                conn.Open();
+                OdbcConnection conn = new OdbcConnection(MySQLConnectionString);
 
-                // Confirm user exists
-                using (OdbcCommand userCheck = conn.CreateCommand())
+                using (conn)
                 {
-                    userCheck.CommandText = @"select * from user
+                    conn.Open();
+
+                    // Confirm user exists
+                    using (OdbcCommand userCheck = conn.CreateCommand())
+                    {
+                        userCheck.CommandText = @"select * from user
                                         WHERE userName = ?;";
-                    userCheck.Parameters.Add("@username", OdbcType.NVarChar).Value = login;
-                    
-                    OdbcDataReader reader = userCheck.ExecuteReader();
+                        userCheck.Parameters.Add("@username", OdbcType.NVarChar).Value = login;
 
-                    if (!reader.HasRows)
-                    {
-                        if (isTagalog)
-                            MessageBox.Show($"Walang user {login}");
-                        else
-                            MessageBox.Show($"User: {login} does not exist");
+                        OdbcDataReader reader = userCheck.ExecuteReader();
 
-                        return;
-                    }
-                }
+                        if (!reader.HasRows)
+                        {
+                            if (isTagalog)
+                                MessageBox.Show($"Walang user {login}");
+                            else
+                                MessageBox.Show($"User: {login} does not exist");
 
-                // Confirm correct password
-                using (OdbcCommand passwordCheck = conn.CreateCommand())
-                {
-                    passwordCheck.CommandText = @"select password from user WHERE userName = ?;";
-                    passwordCheck.Parameters.Add("@username", OdbcType.NVarChar).Value = login;
-
-                    var pass = "";
-
-                    OdbcDataReader reader2 = passwordCheck.ExecuteReader();
-                    while(reader2.Read())
-                    {
-                        pass = reader2.GetString("password");
+                            return;
+                        }
                     }
 
-                    if (pass != password)
+                    // Confirm correct password
+                    using (OdbcCommand passwordCheck = conn.CreateCommand())
                     {
-                        if (isTagalog)
-                            MessageBox.Show("Mali ang pagpasok at/o password.");
-                        else
-                            MessageBox.Show("You do not carry the membership.\nPassword is incorrect.");
-                        
-                        return;
+                        passwordCheck.CommandText = @"select password from user WHERE userName = ?;";
+                        passwordCheck.Parameters.Add("@username", OdbcType.NVarChar).Value = login;
+
+                        var pass = "";
+
+                        OdbcDataReader reader2 = passwordCheck.ExecuteReader();
+                        while (reader2.Read())
+                        {
+                            pass = reader2.GetString("password");
+                        }
+
+                        if (pass != password)
+                        {
+                            if (isTagalog)
+                                MessageBox.Show("Mali ang pagpasok at/o password.");
+                            else
+                                MessageBox.Show("You do not carry the membership.\nPassword is incorrect.");
+
+                            return;
+                        }
                     }
-                }
-                // *** Login successful by this point ***
-                // Store the userID for whatever the user adds/deletes/updates in the Dash window
-                using (OdbcCommand setUserId = conn.CreateCommand())
-                {
-                    setUserId.CommandText = @"select userId from user WHERE userName = ?;";
-                    setUserId.Parameters.Add("@username", OdbcType.NVarChar).Value = login;
+                    // *** Login successful by this point ***
+                    // Store the userID for whatever the user adds/deletes/updates in the Dash window
+                    using (OdbcCommand setUserId = conn.CreateCommand())
+                    {
+                        setUserId.CommandText = @"select userId from user WHERE userName = ?;";
+                        setUserId.Parameters.Add("@username", OdbcType.NVarChar).Value = login;
 
-                    userId = (int)setUserId.ExecuteScalar();
+                        userId = (int)setUserId.ExecuteScalar();
+                    }
+
+                    userName = login;
                 }
 
-                userName = login;
+                logger($"User {login} loggin in.");
+
+
+                // Otherwise, cue the main application window and axe the login window
+                var dashboard = new Windows.Dash();
+                dashboard.Show();
             }
 
-            logger($"User {login} loggin in.");
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error:\n\n{ex.Message}");
+            }
 
-
-            // Otherwise, cue the main application window and axe the login window
-            var dashboard = new Windows.Dash();
-            dashboard.Show();
+           
             this.Close();
 
         }

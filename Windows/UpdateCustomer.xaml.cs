@@ -68,7 +68,8 @@ namespace Scheduler.Windows
                 using (OdbcCommand populateCustomerName = conn.CreateCommand())
                 {
                     populateCustomerName.CommandText = $"select customerName from customer WHERE customerId = {MainWindow.customerId};";
-                    txtUpdateCustomerName.Text = populateCustomerName.ExecuteScalar().ToString();
+                    MainWindow.customerName = populateCustomerName.ExecuteScalar().ToString();
+                    txtUpdateCustomerName.Text = MainWindow.customerName;
                 }
             }
         }
@@ -143,7 +144,7 @@ namespace Scheduler.Windows
 
                 using (OdbcCommand updateCustomer = conn.CreateCommand())
                 {
-                    updateCustomer.CommandText = $"update customer SET active = {enableCustomer}, lastUpdate = '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', lastUpdateBy = '{MainWindow.userName}' " +
+                    updateCustomer.CommandText = $"update customer SET customerName = '{txtUpdateCustomerName.Text}', active = {enableCustomer}, lastUpdate = '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', lastUpdateBy = '{MainWindow.userName}' " +
                         $"WHERE customerId = {MainWindow.customerId};";
 
                     updateCustomer.ExecuteNonQuery();

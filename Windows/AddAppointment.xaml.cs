@@ -90,7 +90,7 @@ namespace Scheduler.Windows
                 // Check for overlapping appointments
                 using (OdbcCommand overlapCheck = conn.CreateCommand())
                 {
-                    overlapCheck.CommandText = $"select * from appointment WHERE (start between '{dateStart.SelectedDate.Value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}' and '{dateEnd.SelectedDate.Value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}') OR " +
+                    overlapCheck.CommandText = $"select * from appointment WHERE (start between '{startDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}' and '{endDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}') OR " +
                         $"(end between '{dateStart.SelectedDate.Value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}' and '{dateEnd.SelectedDate.Value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}');";
 
                     OdbcDataReader reader = overlapCheck.ExecuteReader();

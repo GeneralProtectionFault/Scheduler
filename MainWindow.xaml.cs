@@ -31,6 +31,7 @@ namespace Scheduler
         internal static string userName;
 
         internal static int customerId;
+        internal static string customerName;
         
         // Used to track the record when updating/editing
         internal static int appointmentId;

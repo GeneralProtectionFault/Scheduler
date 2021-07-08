@@ -2,6 +2,7 @@
 using System.Data.Odbc;
 using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -443,7 +444,7 @@ namespace Scheduler.Windows
             var customerIdCell = dataCustomers.Columns[0].GetCellContent(row) as TextBlock;
             MainWindow.customerId = Convert.ToInt32(customerIdCell.Text);
 
-            var customerAddressCell = dataCustomers.Columns[2].GetCellContent(row) as TextBlock;
+            var customerAddressCell = dataCustomers.Columns[1].GetCellContent(row) as TextBlock;
             MainWindow.addressId = Convert.ToInt32(customerAddressCell.Text);
             
 
@@ -455,30 +456,57 @@ namespace Scheduler.Windows
 
 
 
-        private void btnDeleteCustomer_Click(object sender, RoutedEventArgs e)
+        async private void btnDeleteCustomer_Click(object sender, RoutedEventArgs e)
         {
-            if (dataCustomers.SelectedItem == null)
+            try
             {
-                MessageBox.Show("Please select a customer to delete.");
-                return;
+                if (dataCustomers.SelectedItem == null)
+                {
+                    MessageBox.Show("Please select a customer to delete.");
+                    return;
+                }
+
+                DataGridRow row = (DataGridRow)dataCustomers.ItemContainerGenerator.ContainerFromItem(dataCustomers.SelectedItem);
+                var customerCellContent = dataCustomers.Columns[0].GetCellContent(row) as TextBlock;
+                var customerId = Convert.ToInt32(customerCellContent.Text);
+
+                MessageBoxResult result = MessageBox.Show($"Are you sure you wish to delete customer ID: {customerId}?\nAll appointments for this customer will also be deleted.", "Confirm delete", MessageBoxButton.OKCancel);
+                if (result == MessageBoxResult.Cancel)
+                    return;
+
+
+                using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
+                {
+                    conn.Open();
+
+                    // First, delete all appointments for this customer to prevent foreign key violations
+
+                    await Task.Run(() =>
+                    {
+                        using (OdbcCommand deleteCustomerAppointments = conn.CreateCommand())
+                        {
+                            deleteCustomerAppointments.CommandText = $"delete from appointment WHERE customerId = {customerId};";
+                            deleteCustomerAppointments.ExecuteNonQuery();
+                        }
+                    });
+
+
+                    await Task.Run(() =>
+                    {
+                        using (OdbcCommand deleteCustomer = conn.CreateCommand())
+                        {
+                            deleteCustomer.CommandText = $"delete from customer WHERE customerId = {customerId};";
+                            deleteCustomer.ExecuteNonQuery();
+                        }
+                    });
+                }
+
+                UpdateDates();
+                CreateCustomerCollection();
             }
-
-            DataGridRow row = (DataGridRow)dataCustomers.ItemContainerGenerator.ContainerFromItem(dataCustomers.SelectedItem);
-            var customerCellContent = dataCustomers.Columns[0].GetCellContent(row) as TextBlock;
-            var customerId = Convert.ToInt32(customerCellContent.Text);
-
-            MessageBoxResult result = MessageBox.Show($"Are you sure you wish to delete custoemr ID: {customerId}?", "Confirm delete", MessageBoxButton.OKCancel);
-            if (result == MessageBoxResult.Cancel)
-                return;
-
-
-            using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
-            using (OdbcCommand deleteCustomer = conn.CreateCommand())
+            catch (Exception ex)
             {
-                conn.Open();
-
-                deleteCustomer.CommandText = $"delete from customer WHERE appointmentId = {customerId};";
-                deleteCustomer.ExecuteNonQuery();
+                MessageBox.Show($"Error: \n\n {ex.Message}");
             }
         }
 

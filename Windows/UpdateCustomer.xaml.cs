@@ -21,7 +21,7 @@ namespace Scheduler.Windows
     public partial class UpdateCustomer : Window
     {
         private Dictionary<string, int> currentCountries = new Dictionary<string, int>();
-        private Dictionary<string, int> currentCities = new Dictionary<string, int>();
+        private Dictionary<string, int> currentCities = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         public static EventHandler CustomerUpdated;
 
@@ -49,7 +49,7 @@ namespace Scheduler.Windows
                     }
                 }
 
-                // Populate city box w/ available cities.
+                // Populate city dictionary w/ available cities.
                 using (OdbcCommand populateCities = conn.CreateCommand())
                 {
                     populateCities.CommandText = @"select * from city;";
@@ -59,7 +59,7 @@ namespace Scheduler.Windows
                     while (reader2.Read())
                     {
                         currentCities.Add(reader2.GetString(1), reader2.GetInt32(0));
-                        cmbUpdateCustomerCity.Items.Add(reader2.GetString(1));
+                        // cmbUpdateCustomerCity.Items.Add(reader2.GetString(1));
                     }
                 }
 
@@ -74,16 +74,20 @@ namespace Scheduler.Windows
             }
         }
 
+
+
         private void btnUpdateCustomerCancel_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
 
+
+
         private void btnUpdateCustomerConfirm_Click(object sender, RoutedEventArgs e)
         {
             // Validation ************************
             if (cmbUpdateCustomerCountry.SelectedItem == null ||
-                cmbUpdateCustomerCity.SelectedItem == null ||
+                String.IsNullOrEmpty(txtUpdateCustomerCity.Text) ||
                 String.IsNullOrEmpty(txtUpdateCustomerStreet.Text) ||
                 String.IsNullOrEmpty(txtUpdateCustomerPostal.Text) ||
                 String.IsNullOrEmpty(txtUpdateCustomerPhone.Text))
@@ -108,31 +112,52 @@ namespace Scheduler.Windows
 
 
 
+            // Check if the city is already in the database
+            int enteredCityIndex = -1;
+            
+            if (currentCities.ContainsKey(txtUpdateCustomerCity.Text))
+            {
+                enteredCityIndex = currentCities[txtUpdateCustomerCity.Text];
+            }
+
+
+            // If the city isn't already in the database, add it!
+            if (enteredCityIndex == -1)
+            {
+                using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
+                {
+                    using (OdbcCommand insertCity = conn.CreateCommand())
+                    {
+                        conn.Open();
+
+                        insertCity.CommandText = $"INSERT INTO city (city, countryId, createDate, createdBy, lastUpdate, lastUpdateBy) " +
+                            $"VALUES('{txtUpdateCustomerCity.Text}', {currentCountries[cmbUpdateCustomerCountry.SelectedItem.ToString()]}, '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', " +
+                            $"'{MainWindow.userName}', '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}'); ";
+
+
+                        insertCity.ExecuteNonQuery();
+                    }
+
+                    // Grab the Id of the newly entered city!
+                    using (OdbcCommand getCityId = conn.CreateCommand())
+                    {
+                        getCityId.CommandText = $"select MAX(cityId) from city;";
+                        enteredCityIndex = (int)getCityId.ExecuteScalar();
+                    }
+                }
+            }
+
+
 
 
             using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
             {
                 conn.Open();
 
-                // Check city vs. country
-                using (OdbcCommand countryCheck = conn.CreateCommand())
-                {
-                    countryCheck.CommandText = $"select countryId from city WHERE city = '{cmbUpdateCustomerCity.SelectedItem}';";
-                    var result = countryCheck.ExecuteScalar();
-
-                    if (result == null)
-                    {
-                        MessageBox.Show("City is not from selected country.  Please mitigate.");
-                        return;
-                    }
-                }
-
-
-
-
+                // Do the update in the address table...
                 using (OdbcCommand updateAddress = conn.CreateCommand())
                 {
-                    updateAddress.CommandText = $"update address SET address = '{txtUpdateCustomerStreet.Text}', address2 = '{txtUpdateCustomerStreet2.Text}', cityId = {currentCities[cmbUpdateCustomerCity.SelectedItem.ToString()]}, " +
+                    updateAddress.CommandText = $"update address SET address = '{txtUpdateCustomerStreet.Text}', address2 = '{txtUpdateCustomerStreet2.Text}', cityId = {enteredCityIndex}, " +
                         $"postalCode = '{txtUpdateCustomerPostal.Text}', phone = '{txtUpdateCustomerPhone.Text}', lastUpdate = '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', lastUpdateBy = '{MainWindow.userName}' " +
                         $"WHERE addressId = {MainWindow.addressId};";
 

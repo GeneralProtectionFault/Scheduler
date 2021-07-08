@@ -34,7 +34,7 @@ namespace Scheduler.Windows
     public partial class AddCustomer : Window
     {
         private Dictionary<string, int> currentCountries = new Dictionary<string, int>();
-        private Dictionary<string, int> currentCities = new Dictionary<string, int>();
+        private Dictionary<string, int> currentCities = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         public static event EventHandler CustomerAdded;
 
@@ -61,7 +61,7 @@ namespace Scheduler.Windows
                     }
                 }
 
-                // Populate city box w/ available cities.
+                // Populate city dictionary w/ available cities.
                 using (OdbcCommand populateCities = conn.CreateCommand())
                 {
                     populateCities.CommandText = @"select * from city;";
@@ -71,7 +71,6 @@ namespace Scheduler.Windows
                     while (reader2.Read())
                     {
                         currentCities.Add(reader2.GetString(1), reader2.GetInt32(0));
-                        cmbCity.Items.Add(reader2.GetString(1));
                     }
                 }
 
@@ -82,7 +81,7 @@ namespace Scheduler.Windows
         {
             // Validation ************************
             if(cmbCountry.SelectedItem == null ||
-                cmbCity.SelectedItem == null ||
+                String.IsNullOrEmpty(txtAddCustomerCity.Text) ||
                 String.IsNullOrEmpty(txtAddCustomerName.Text) ||
                 String.IsNullOrEmpty(txtAddCustomerPhone.Text) ||
                 String.IsNullOrEmpty(txtAddCustomerStreet.Text) ||
@@ -107,6 +106,46 @@ namespace Scheduler.Windows
             }
 
 
+            // Check if the city is already in the database
+            int enteredCityIndex = -1;
+            // If so, set the index here
+            if (currentCities.ContainsKey(txtAddCustomerCity.Text))
+            {
+                enteredCityIndex = currentCities[txtAddCustomerCity.Text];
+            }
+
+
+
+            // If the city isn't already in the database, add it!
+            if (enteredCityIndex == -1)
+            {
+                using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
+                {
+                    using (OdbcCommand insertCity = conn.CreateCommand())
+                    {
+                        conn.Open();
+
+                        insertCity.CommandText = $"INSERT INTO city (city, countryId, createDate, createdBy, lastUpdate, lastUpdateBy) " +
+                            $"VALUES('{txtAddCustomerCity.Text}', {currentCountries[cmbCountry.SelectedItem.ToString()]}, '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', " +
+                            $"'{MainWindow.userName}', '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}'); ";
+
+
+                        insertCity.ExecuteNonQuery();
+                    }
+
+                    // Grab the Id of the newly entered city!
+                    using (OdbcCommand getCityId = conn.CreateCommand())
+                    {
+                        getCityId.CommandText = $"select MAX(cityId) from city;";
+                        enteredCityIndex = (int)getCityId.ExecuteScalar();
+                    }
+                }
+            }
+
+
+
+
+
 
             using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
             {
@@ -115,7 +154,7 @@ namespace Scheduler.Windows
                 // Check city vs. country
                 using (OdbcCommand countryCheck = conn.CreateCommand())
                 {
-                    countryCheck.CommandText = $"select countryId from city WHERE city = '{cmbCity.SelectedItem}';";
+                    countryCheck.CommandText = $"select countryId from city WHERE city = '{txtAddCustomerCity.Text}';";
                     var result = countryCheck.ExecuteScalar();
 
                     if(result == null)
@@ -131,7 +170,7 @@ namespace Scheduler.Windows
                 using (OdbcCommand addAddress = conn.CreateCommand())
                 {
                     addAddress.CommandText = $"INSERT INTO address (address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES " +
-                        $"('{txtAddCustomerStreet.Text}', '{txtAddCustomerStreet2.Text}', {currentCities[cmbCity.SelectedItem.ToString()]}, '{txtAddCustomerPostal.Text}', '{txtAddCustomerPhone.Text}', " +
+                        $"('{txtAddCustomerStreet.Text}', '{txtAddCustomerStreet2.Text}', {enteredCityIndex}, '{txtAddCustomerPostal.Text}', '{txtAddCustomerPhone.Text}', " +
                         $"'{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}', '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}')";
 
                     addAddress.ExecuteNonQuery();                    

@@ -102,9 +102,10 @@ namespace Scheduler.Windows
                 {
                     conn.Open();
 
-                    populateCustomers.CommandText = @"select c.customerId, c.addressId, c.active, c.customerName, a.address, a.address2, a.postalCode, a.phone, c.createDate, c.createdBy, c.lastUpdate, c.lastUpdateBy
+                    populateCustomers.CommandText = @"select c.customerId, c.addressId, c.active, c.customerName, a.address, a.address2, ct.city, a.postalCode, a.phone, c.createDate, c.createdBy, c.lastUpdate, c.lastUpdateBy
                                                         from customer c
-                                                        JOIN address a on c.addressId = a.addressId;";
+                                                        JOIN address a on c.addressId = a.addressId
+                                                        JOIN city ct on a.cityId = ct.cityId;";
 
                     OdbcDataReader reader = populateCustomers.ExecuteReader();
 
@@ -121,12 +122,13 @@ namespace Scheduler.Windows
                                     customerName = reader.GetString(3),
                                     address = reader.GetString(4),
                                     address2 = reader.GetString(5),
-                                    postalCode = reader.GetString(6),
-                                    phone = reader.GetString(7),
-                                    createDate = reader.GetDateTime(8).ToLocalTime(),
-                                    createdBy = reader.GetString(9),
-                                    lastUpdate = reader.GetDateTime(10).ToLocalTime(),
-                                    lastUpdateBy = reader.GetString(11)
+                                    city = reader.GetString(6),
+                                    postalCode = reader.GetString(7),
+                                    phone = reader.GetString(8),
+                                    createDate = reader.GetDateTime(9).ToLocalTime(),
+                                    createdBy = reader.GetString(10),
+                                    lastUpdate = reader.GetDateTime(11).ToLocalTime(),
+                                    lastUpdateBy = reader.GetString(12)
                                 }); ;
                         }
                     }

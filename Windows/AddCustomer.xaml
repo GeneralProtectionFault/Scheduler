@@ -19,7 +19,6 @@
         <Label x:Name="lblAddCustomerCountry" Content="Country" HorizontalAlignment="Left" Margin="460,240,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Width="186"/>
         <ComboBox x:Name="cmbCountry" HorizontalAlignment="Left" Margin="672,247,0,0" VerticalAlignment="Top" Width="217" Height="31" FontSize="14"/>
         <Label x:Name="lblAddCustomerCity" Content="City" HorizontalAlignment="Left" Margin="460,0,0,0" VerticalAlignment="Center" FontSize="16" FontWeight="Bold" Width="186"/>
-        <ComboBox x:Name="cmbCity" HorizontalAlignment="Left" Margin="672,0,0,0" VerticalAlignment="Center" Width="217" Height="31" FontSize="14"/>
         <Label x:Name="lblAddCustomerStreet" Content="Street" HorizontalAlignment="Left" Margin="460,327,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Width="186"/>
         <Label x:Name="lblAddCustomerPostal" Content="Postal Code" HorizontalAlignment="Left" Margin="460,401,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Width="186"/>
         <Label x:Name="lblAddCustomerStreet2" Content="Street Line 2" HorizontalAlignment="Left" Margin="460,363,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Width="186"/>
@@ -31,6 +30,7 @@
         <TextBox x:Name="txtAddCustomerPostal" HorizontalAlignment="Left" Margin="672,399,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="204" Height="31" FontSize="18"/>
         <Button x:Name="btnAddCustomerConfirm" Content="Confirm" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Height="41" Width="190" FontSize="20" FontWeight="Bold" Background="#FFFFCB8C" Click="btnAddCustomerConfirm_Click"/>
         <Button x:Name="btnAddCustomerCancel" Content="Cancel" HorizontalAlignment="Right" Margin="0,0,224,10" VerticalAlignment="Bottom" Height="41" Width="190" FontSize="20" FontWeight="Bold" Background="#FFEFFF8C" Click="btnAddCustomerCancel_Click"/>
+        <TextBox x:Name="txtAddCustomerCity" HorizontalAlignment="Left" Margin="672,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="268" Height="31" FontSize="18"/>
 
     </Grid>
 </Window>

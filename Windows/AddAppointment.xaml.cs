@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Odbc;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -90,8 +91,10 @@ namespace Scheduler.Windows
                 // Check for overlapping appointments
                 using (OdbcCommand overlapCheck = conn.CreateCommand())
                 {
-                    overlapCheck.CommandText = $"select * from appointment WHERE (start between '{startDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}' and '{endDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}') OR " +
-                        $"(end between '{dateStart.SelectedDate.Value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}' and '{dateEnd.SelectedDate.Value.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}');";
+                    overlapCheck.CommandText = $"select * from appointment WHERE ('{startDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}' between start and end) OR " +
+                        $"('{endDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}' between start and end);";
+
+                    Debug.WriteLine($"Overlap check query:\n{overlapCheck.CommandText}");
 
                     OdbcDataReader reader = overlapCheck.ExecuteReader();
                     if (reader.HasRows)

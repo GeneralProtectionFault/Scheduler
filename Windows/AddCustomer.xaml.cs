@@ -45,33 +45,41 @@ namespace Scheduler.Windows
             
             using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
             {
-                // Populate country box w/ available countries.
-                using (OdbcCommand populateCountries = conn.CreateCommand())
+                try
                 {
-                    conn.Open();
 
-                    populateCountries.CommandText = @"select * from country;";
-
-                    OdbcDataReader reader = populateCountries.ExecuteReader();
-
-                    while (reader.Read())
+                    // Populate country box w/ available countries.
+                    using (OdbcCommand populateCountries = conn.CreateCommand())
                     {
-                        currentCountries.Add(reader.GetString(1), reader.GetInt32(0));
-                        cmbCountry.Items.Add(reader.GetString(1));
+                        conn.Open();
+
+                        populateCountries.CommandText = @"select * from country;";
+
+                        OdbcDataReader reader = populateCountries.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            currentCountries.Add(reader.GetString(1), reader.GetInt32(0));
+                            cmbCountry.Items.Add(reader.GetString(1));
+                        }
+                    }
+
+                    // Populate city dictionary w/ available cities.
+                    using (OdbcCommand populateCities = conn.CreateCommand())
+                    {
+                        populateCities.CommandText = @"select * from city;";
+
+                        OdbcDataReader reader2 = populateCities.ExecuteReader();
+
+                        while (reader2.Read())
+                        {
+                            currentCities.Add(reader2.GetString(1), reader2.GetInt32(0));
+                        }
                     }
                 }
-
-                // Populate city dictionary w/ available cities.
-                using (OdbcCommand populateCities = conn.CreateCommand())
+                catch (Exception ex)
                 {
-                    populateCities.CommandText = @"select * from city;";
-
-                    OdbcDataReader reader2 = populateCities.ExecuteReader();
-
-                    while (reader2.Read())
-                    {
-                        currentCities.Add(reader2.GetString(1), reader2.GetInt32(0));
-                    }
+                    MessageBox.Show($"Error - {ex.Message}");
                 }
 
             }
@@ -145,57 +153,65 @@ namespace Scheduler.Windows
 
 
 
-
-
-            using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
+            try
             {
-                conn.Open();
 
-                // Check city vs. country
-                using (OdbcCommand countryCheck = conn.CreateCommand())
+                using (OdbcConnection conn = new OdbcConnection(MainWindow.MySQLConnectionString))
                 {
-                    countryCheck.CommandText = $"select countryId from city WHERE city = '{txtAddCustomerCity.Text}';";
-                    var result = countryCheck.ExecuteScalar();
+                    conn.Open();
 
-                    if(result == null)
+                    // Check city vs. country
+                    using (OdbcCommand countryCheck = conn.CreateCommand())
                     {
-                        MessageBox.Show("City is not from selected country.  Please mitigate.");
-                        return;
+                        countryCheck.CommandText = $"select countryId from city WHERE city = '{txtAddCustomerCity.Text}';";
+                        var result = countryCheck.ExecuteScalar();
+
+                        if (result == null)
+                        {
+                            MessageBox.Show("City is not from selected country.  Please mitigate.");
+                            return;
+                        }
                     }
+
+
+
+
+                    using (OdbcCommand addAddress = conn.CreateCommand())
+                    {
+                        addAddress.CommandText = $"INSERT INTO address (address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES " +
+                            $"('{txtAddCustomerStreet.Text}', '{txtAddCustomerStreet2.Text}', {enteredCityIndex}, '{txtAddCustomerPostal.Text}', '{txtAddCustomerPhone.Text}', " +
+                            $"'{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}', '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}')";
+
+                        addAddress.ExecuteNonQuery();
+                    }
+
+
+                    // Get the auto-increment addressId from the record we just inserted above
+                    int addressId = 0;
+
+                    using (OdbcCommand getAddressId = conn.CreateCommand())
+                    {
+                        getAddressId.CommandText = $"select MAX(addressId) from address;";
+                        addressId = (int)getAddressId.ExecuteScalar();
+                    }
+
+
+                    using (OdbcCommand addCustomer = conn.CreateCommand())
+                    {
+                        addCustomer.CommandText = $"INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES " +
+                            $"('{txtAddCustomerName.Text}', {addressId}, 1, '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}', '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}');";
+
+                        addCustomer.ExecuteNonQuery();
+                    }
+
+
                 }
 
-
-
-
-                using (OdbcCommand addAddress = conn.CreateCommand())
-                {
-                    addAddress.CommandText = $"INSERT INTO address (address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES " +
-                        $"('{txtAddCustomerStreet.Text}', '{txtAddCustomerStreet2.Text}', {enteredCityIndex}, '{txtAddCustomerPostal.Text}', '{txtAddCustomerPhone.Text}', " +
-                        $"'{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}', '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}')";
-
-                    addAddress.ExecuteNonQuery();                    
-                }
-
-                
-                // Get the auto-increment addressId from the record we just inserted above
-                int addressId = 0;
-
-                using (OdbcCommand getAddressId = conn.CreateCommand())
-                {
-                    getAddressId.CommandText = $"select MAX(addressId) from address;";
-                    addressId = (int)getAddressId.ExecuteScalar();
-                }
-
-
-                using (OdbcCommand addCustomer = conn.CreateCommand())
-                {
-                    addCustomer.CommandText = $"INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES " +
-                        $"('{txtAddCustomerName.Text}', {addressId}, 1, '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}', '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', '{MainWindow.userName}');";
-
-                    addCustomer.ExecuteNonQuery();
-                }
-
-
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error - {ex.Message}");
+                return;
             }
 
             CustomerAdded?.Invoke(this, e);

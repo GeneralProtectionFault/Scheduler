@@ -111,13 +111,27 @@ namespace Scheduler.Windows
             {
                 conn.Open();
 
-                using(OdbcCommand updateCustomer = conn.CreateCommand())
+                // Check for overlapping appointments
+                using (OdbcCommand overlapCheck = conn.CreateCommand())
                 {
-                    updateCustomer.CommandText = $"update appointment SET customerId = {MainWindow.customerId}, title = '{txtUpdateAppointmentTitle.Text}', description = '{txtUpdateAppointmentDesc.Text}', location = '{txtUpdateAppointmentLocation.Text}', " +
+                    overlapCheck.CommandText = $"select * from appointment WHERE ('{startDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}' between start and end) OR " +
+                        $"('{endDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}' between start and end);";
+
+                    OdbcDataReader reader = overlapCheck.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        MessageBox.Show("This appointment would conflict with an existing appointment");
+                        return;
+                    }
+                }
+
+                using (OdbcCommand updateAppointment = conn.CreateCommand())
+                {
+                    updateAppointment.CommandText = $"update appointment SET customerId = {MainWindow.customerId}, title = '{txtUpdateAppointmentTitle.Text}', description = '{txtUpdateAppointmentDesc.Text}', location = '{txtUpdateAppointmentLocation.Text}', " +
                         $"contact = '{txtUpdateAppointmentContact.Text}', type = '{txtUpdateAppointmentType.Text}', url = '{txtUpdateAppointmentURL.Text}', start = '{startDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', end = '{endDate24hr.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', " +
                         $"lastUpdate = '{DateTime.Now.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")}', lastUpdateBy = '{MainWindow.userName}' WHERE appointmentId = {MainWindow.appointmentId}";
 
-                    updateCustomer.ExecuteNonQuery();
+                    updateAppointment.ExecuteNonQuery();
                 }
             }
 

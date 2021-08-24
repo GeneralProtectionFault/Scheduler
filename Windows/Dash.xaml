@@ -38,6 +38,23 @@
         <ComboBox x:Name="cmbReports" HorizontalAlignment="Left" Margin="26,534,0,0" VerticalAlignment="Top" Width="179" Height="30" FontSize="14">
             <DataGrid/>
         </ComboBox>
+        <Button x:Name="btnDescSearch" Content="[Override] Description Search" HorizontalAlignment="Left" Margin="494,55,0,0" VerticalAlignment="Top" Width="177" Foreground="White" Click="btnDescSearch_Click">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF001E2E"/>
+                    <GradientStop Color="#FFACACAC" Offset="1"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
+        <TextBox x:Name="txtSearch" HorizontalAlignment="Left" Margin="242,57,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="229"/>
+        <Button x:Name="btnCalendarSearch" Content="[Revert] Calendar Search" HorizontalAlignment="Left" Margin="690,55,0,0" VerticalAlignment="Top" Width="146" Foreground="White" Click="btnCalendarSearch_Click">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF001E2E"/>
+                    <GradientStop Color="#FFACACAC" Offset="1"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
 
     </Grid>
 </Window>

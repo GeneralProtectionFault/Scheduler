@@ -672,5 +672,15 @@ namespace Scheduler.Windows
                 MessageBox.Show($"Error - {ex.Message}");
             }
         }
+
+        private void btnDescSearch_Click(object sender, RoutedEventArgs e)
+        {
+            CreateDataCollection($"select * from appointment WHERE description like '%{txtSearch.Text}%';");
+        }
+
+        private void btnCalendarSearch_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateDates();
+        }
     }
 }
